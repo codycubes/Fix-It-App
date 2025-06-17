@@ -1,0 +1,464 @@
+{
+  "corporations": [
+    {
+      "corporation_id": 1,
+      "name": "BlueMachine",
+      "location": "Johannesburg, South Africa"
+    }
+  ],
+  "municipalities": [
+    {
+      "municipality_id": 1,
+      "name": "City of Johannesburg",
+      "location": "Johannesburg, Gauteng",
+      "blue_machine_id": 1
+    },
+    {
+      "municipality_id": 2,
+      "name": "City of Tshwane",
+      "location": "Pretoria, Gauteng", 
+      "blue_machine_id": 1
+    }
+  ],
+  "roles": [
+    {
+      "role_id": 1,
+      "role_name": "Super Admin"
+    },
+    {
+      "role_id": 2,
+      "role_name": "System Admin"
+    },
+    {
+      "role_id": 3,
+      "role_name": "Municipality Admin"
+    },
+    {
+      "role_id": 4,
+      "role_name": "Manager"
+    },
+    {
+      "role_id": 5,
+      "role_name": "Contractor"
+    },
+    {
+      "role_id": 6,
+      "role_name": "User"
+    }
+  ],
+  "categories": [
+    {
+      "category_id": 1,
+      "name": "Roads & Infrastructure"
+    },
+    {
+      "category_id": 2,
+      "name": "Traffic & Transportation"
+    },
+    {
+      "category_id": 3,
+      "name": "Public Spaces & Parks"
+    },
+    {
+      "category_id": 4,
+      "name": "Water & Sanitation"
+    },
+    {
+      "category_id": 5,
+      "name": "Electricity & Utilities"
+    },
+    {
+      "category_id": 6,
+      "name": "Safety & Security"
+    }
+  ],
+  "users": [
+    {
+      "user_id": 1,
+      "username": "admin_bluemachine",
+      "email": "admin@bluemachine.co.za",
+      "role_id": 1,
+      "municipality_id": null,
+      "corporation_id": 1,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "user_id": 2,
+      "username": "john_manager",
+      "email": "john.smith@jhb.gov.za",
+      "role_id": 4,
+      "municipality_id": 1,
+      "corporation_id": 1,
+      "created_at": "2024-01-15T08:00:00Z"
+    },
+    {
+      "user_id": 3,
+      "username": "sarah_contractor",
+      "email": "sarah.jones@contractor.co.za",
+      "role_id": 5,
+      "municipality_id": 1,
+      "corporation_id": 1,
+      "created_at": "2024-02-01T09:00:00Z"
+    },
+    {
+      "user_id": 4,
+      "username": "citizen_mike",
+      "email": "mike.citizen@gmail.com",
+      "role_id": 6,
+      "municipality_id": 1,
+      "corporation_id": 1,
+      "created_at": "2024-03-01T14:30:00Z"
+    },
+    {
+      "user_id": 5,
+      "username": "contractor_david",
+      "email": "david.repairs@fixit.co.za",
+      "role_id": 5,
+      "municipality_id": 2,
+      "corporation_id": 1,
+      "created_at": "2024-02-15T10:00:00Z"
+    },
+    {
+      "user_id": 6,
+      "username": "builder_bob",
+      "email": "bob.builder@construction.co.za",
+      "role_id": 5,
+      "municipality_id": 1,
+      "corporation_id": 1,
+      "created_at": "2024-03-10T11:00:00Z"
+    },
+    {
+      "user_id": 7,
+      "username": "electric_emma",
+      "email": "emma.electric@sparkies.com",
+      "role_id": 5,
+      "municipality_id": 2,
+      "corporation_id": 1,
+      "created_at": "2024-04-22T09:45:00Z"
+    }
+  ],
+  "contractors": [
+    {
+      "contractor_id": 1,
+      "user_id": 3
+    },
+    {
+      "contractor_id": 2,
+      "user_id": 5
+    },
+    {
+      "contractor_id": 3,
+      "user_id": 6
+    },
+    {
+      "contractor_id": 4,
+      "user_id": 7
+    }
+  ],
+  "issues": [
+    {
+      "issue_id": 1,
+      "user_id": 4,
+      "category_id": 1,
+      "municipality_id": 1,
+      "title": "Pothole on Rivonia Road",
+      "description": "Large pothole causing damage to vehicles near Sandton City shopping center",
+      "location": "83 Rivonia Rd, Sandhurst, Sandton",
+      "latitude": -26.1067,
+      "longitude": 28.0568,
+      "status": "In Progress",
+      "status_color": "#FFA500",
+      "priority": "High",
+      "assigned_to": 3,
+      "created_at": "2024-06-01T08:30:00Z",
+      "updated_at": "2024-06-03T14:15:00Z",
+      "image_url": "https://picsum.photos/seed/report1/800/600"
+    },
+    {
+      "issue_id": 2,
+      "user_id": 4,
+      "category_id": 2,
+      "municipality_id": 1,
+      "title": "Broken Traffic Light",
+      "description": "Traffic light not working at major intersection causing traffic congestion",
+      "location": "Orlando West, Soweto",
+      "latitude": -26.2485,
+      "longitude": 27.8540,
+      "status": "Assigned",
+      "status_color": "#4169E1",
+      "priority": "High",
+      "assigned_to": 3,
+      "created_at": "2024-06-02T09:15:00Z",
+      "updated_at": "2024-06-02T11:30:00Z",
+      "image_url": "https://picsum.photos/seed/report2/800/600"
+    },
+    {
+      "issue_id": 3,
+      "user_id": 4,
+      "category_id": 3,
+      "municipality_id": 2,
+      "title": "Park Maintenance Required",
+      "description": "Playground equipment needs repair and grass cutting required",
+      "location": "Church Square, Pretoria Central",
+      "latitude": -25.7461,
+      "longitude": 28.1881,
+      "status": "Resolved",
+      "status_color": "#008000",
+      "priority": "Medium",
+      "assigned_to": 5,
+      "created_at": "2024-05-15T10:00:00Z",
+      "updated_at": "2024-05-28T16:45:00Z",
+      "image_url": "https://picsum.photos/seed/report3/800/600"
+    },
+    {
+      "issue_id": 4,
+      "user_id": 4,
+      "category_id": 1,
+      "municipality_id": 1,
+      "title": "Road Surface Deterioration",
+      "description": "Road surface cracking and deteriorating near shopping mall entrance",
+      "location": "50 Bath Ave, Rosebank, Johannesburg",
+      "latitude": -26.1459,
+      "longitude": 28.0322,
+      "status": "In Progress",
+      "status_color": "#FFA500",
+      "priority": "Medium",
+      "assigned_to": 3,
+      "created_at": "2024-06-05T11:20:00Z",
+      "updated_at": "2024-06-06T09:30:00Z",
+      "image_url": "https://picsum.photos/seed/report4/800/600"
+    },
+    {
+      "issue_id": 5,
+      "user_id": 4,
+      "category_id": 4,
+      "municipality_id": 2,
+      "title": "Water Leak",
+      "description": "Water pipe leak causing flooding in residential area",
+      "location": "Cnr Hendrik Verwoerd & Embankment, Centurion",
+      "latitude": -25.8601,
+      "longitude": 28.1905,
+      "status": "Assigned",
+      "status_color": "#4169E1",
+      "priority": "High",
+      "assigned_to": 5,
+      "created_at": "2024-06-07T07:45:00Z",
+      "updated_at": "2024-06-07T08:15:00Z",
+      "image_url": "https://picsum.photos/seed/report5/800/600"
+    },
+    {
+      "issue_id": 6,
+      "user_id": 4,
+      "category_id": 5,
+      "municipality_id": 1,
+      "title": "Streetlight Outage",
+      "description": "Multiple streetlights not working in residential area affecting safety",
+      "location": "43 Bradford Rd, Bedfordview, Germiston",
+      "latitude": -26.1798,
+      "longitude": 28.1127,
+      "status": "Resolved",
+      "status_color": "#008000",
+      "priority": "Medium",
+      "assigned_to": 3,
+      "created_at": "2024-05-20T19:30:00Z",
+      "updated_at": "2024-05-25T14:20:00Z",
+      "image_url": "https://picsum.photos/seed/report6/800/600"
+    },
+    {
+      "issue_id": 7,
+      "user_id": 4,
+      "category_id": 1,
+      "municipality_id": 2,
+      "title": "Road Signage Missing",
+      "description": "Important road signs missing near university campus",
+      "location": "Hatfield, Pretoria",
+      "latitude": -25.7545,
+      "longitude": 28.2314,
+      "status": "In Progress",
+      "status_color": "#FFA500",
+      "priority": "Medium",
+      "assigned_to": 5,
+      "created_at": "2024-06-04T13:10:00Z",
+      "updated_at": "2024-06-05T10:25:00Z",
+      "image_url": "https://picsum.photos/seed/report7/800/600"
+    },
+    {
+      "issue_id": 8,
+      "user_id": 4,
+      "category_id": 6,
+      "municipality_id": 1,
+      "title": "Illegal Dumping",
+      "description": "Large amount of waste illegally dumped on sidewalk",
+      "location": "12th Ave, Alexandra, Johannesburg",
+      "latitude": -26.1092,
+      "longitude": 28.0934,
+      "status": "Resolved",
+      "status_color": "#008000",
+      "priority": "Low",
+      "assigned_to": 3,
+      "created_at": "2024-05-10T12:00:00Z",
+      "updated_at": "2024-05-18T16:00:00Z",
+      "image_url": "https://picsum.photos/seed/report8/800/600"
+    },
+    {
+      "issue_id": 9,
+      "user_id": 4,
+      "category_id": 2,
+      "municipality_id": 2,
+      "title": "Faded Road Markings",
+      "description": "Road markings at pedestrian crossing have faded and are not visible",
+      "location": "Sunnyside, Pretoria",
+      "latitude": -25.7607,
+      "longitude": 28.2045,
+      "status": "In Progress",
+      "status_color": "#FFA500",
+      "priority": "Medium",
+      "assigned_to": 5,
+      "created_at": "2024-06-06T15:20:00Z",
+      "updated_at": "2024-06-06T16:00:00Z",
+      "image_url": "https://picsum.photos/seed/report9/800/600"
+    },
+    {
+      "issue_id": 10,
+      "user_id": 4,
+      "category_id": 3,
+      "municipality_id": 1,
+      "title": "Overgrown Trees",
+      "description": "Trees in park are overgrown and obstructing pathways",
+      "location": "Zoo Lake, Parkview, Johannesburg",
+      "latitude": -26.1555,
+      "longitude": 28.0416,
+      "status": "Resolved",
+      "status_color": "#008000",
+      "priority": "Low",
+      "assigned_to": 3,
+      "created_at": "2024-06-08T08:00:00Z",
+      "updated_at": "2024-06-08T12:30:00Z",
+      "image_url": "https://picsum.photos/seed/report10/800/600"
+    },
+    {
+      "issue_id": 11,
+      "user_id": 4,
+      "category_id": 4,
+      "municipality_id": 1,
+      "title": "Burst Water Pipe",
+      "description": "A major water pipe has burst, flooding the street and causing a water outage in the area.",
+      "location": "789 Oak Avenue, Parktown, Johannesburg",
+      "latitude": -26.1776,
+      "longitude": 28.0367,
+      "status": "Pending",
+      "status_color": "#FFD700",
+      "priority": "Critical",
+      "assigned_to": null,
+      "created_at": "2024-06-10T10:00:00Z",
+      "updated_at": "2024-06-10T10:00:00Z",
+      "image_url": "https://picsum.photos/seed/report11/800/600"
+    },
+    {
+      "issue_id": 12,
+      "user_id": 4,
+      "category_id": 5,
+      "municipality_id": 2,
+      "title": "Power Line Down",
+      "description": "A power line has fallen due to strong winds, posing a serious safety hazard.",
+      "location": "456 Pine Street, Sunnyside, Pretoria",
+      "latitude": -25.7599,
+      "longitude": 28.212,
+      "status": "Pending",
+      "status_color": "#FFD700",
+      "priority": "Critical",
+      "assigned_to": null,
+      "created_at": "2024-06-11T14:20:00Z",
+      "updated_at": "2024-06-11T14:20:00Z",
+      "image_url": "https://picsum.photos/seed/report12/800/600"
+    },
+    {
+      "issue_id": 13,
+      "user_id": 4,
+      "category_id": 6,
+      "municipality_id": 1,
+      "title": "Noise Complaint",
+      "description": "Loud music from a neighboring property after 10 PM on multiple occasions.",
+      "location": "12 Park Lane, Melville, Johannesburg",
+      "latitude": -26.174,
+      "longitude": 28.01,
+      "status": "Closed",
+      "status_color": "#808080",
+      "priority": "Low",
+      "assigned_to": 6,
+      "created_at": "2024-05-01T23:00:00Z",
+      "updated_at": "2024-05-05T12:00:00Z",
+      "image_url": "https://picsum.photos/seed/report13/800/600"
+    },
+    {
+      "issue_id": 14,
+      "user_id": 4,
+      "category_id": 3,
+      "municipality_id": 2,
+      "title": "Broken Park Bench",
+      "description": "A wooden bench in the public park is broken and poses a safety risk.",
+      "location": "321 River Road, Garsfontein, Pretoria",
+      "latitude": -25.799,
+      "longitude": 28.27,
+      "status": "Closed",
+      "status_color": "#808080",
+      "priority": "Low",
+      "assigned_to": 7,
+      "created_at": "2024-04-15T11:30:00Z",
+      "updated_at": "2024-04-20T09:00:00Z",
+      "image_url": "https://picsum.photos/seed/report14/800/600"
+    }
+  ],
+  "issue_updates": [
+    {
+      "update_id": 1,
+      "issue_id": 1,
+      "user_id": 3,
+      "new_status": "In Progress",
+      "update_note": "Started repair work on pothole. Expected completion tomorrow.",
+      "created_at": "2024-06-03T14:15:00Z"
+    },
+    {
+      "update_id": 2,
+      "issue_id": 2,
+      "user_id": 2,
+      "new_status": "Assigned",
+      "update_note": "Assigned to contractor for urgent repair.",
+      "created_at": "2024-06-02T11:30:00Z"
+    },
+    {
+      "update_id": 3,
+      "issue_id": 3,
+      "user_id": 5,
+      "new_status": "Resolved",
+      "update_note": "Playground equipment repaired and park cleaned.",
+      "created_at": "2024-05-28T16:45:00Z"
+    }
+  ],
+  "currentUser": {
+    "user_id": 4,
+    "username": "citizen_mike",
+    "email": "mike.citizen@gmail.com",
+    "role": "user",
+    "role_id": 6,
+    "municipality_id": 1,
+    "corporation_id": 1
+  },
+  "issue_images": [
+    {
+      "image_id": 1,
+      "issue_id": 1,
+      "image_url": "/images/issues/pothole_rivonia_road.jpg"
+    },
+    {
+      "image_id": 2,
+      "issue_id": 2,
+      "image_url": "/images/issues/traffic_light_soweto.jpg"
+    },
+    {
+      "image_id": 3,
+      "issue_id": 5,
+      "image_url": "/images/issues/water_leak_centurion.jpg"
+    }
+  ]
+} 

@@ -1,0 +1,92 @@
+[
+    {
+      "id": 1,
+      "name": "Sandton City",
+      "address": "83 Rivonia Rd, Sandhurst, Sandton",
+      "latitude": -26.1067,
+      "longitude": 28.0568,
+      "status": "in progress",
+      "statusColor": "#FFA500"
+    },
+    {
+      "id": 2,
+      "name": "Soweto",
+      "address": "Orlando West, Soweto",
+      "latitude": -26.2485,
+      "longitude": 27.8540,
+      "status": "assigned",
+      "statusColor": "#4169E1"
+    },
+    {
+      "id": 3,
+      "name": "Pretoria CBD",
+      "address": "Church Square, Pretoria Central",
+      "latitude": -25.7461,
+      "longitude": 28.1881,
+      "status": "fixed",
+      "statusColor": "#008000"
+    },
+    {
+      "id": 4,
+      "name": "Rosebank Mall",
+      "address": "50 Bath Ave, Rosebank, Johannesburg",
+      "latitude": -26.1459,
+      "longitude": 28.0322,
+      "status": "in progress",
+      "statusColor": "#FFA500"
+    },
+    {
+      "id": 5,
+      "name": "Centurion Mall",
+      "address": "Cnr Hendrik Verwoerd & Embankment, Centurion",
+      "latitude": -25.8601,
+      "longitude": 28.1905,
+      "status": "assigned",
+      "statusColor": "#4169E1"
+    },
+    {
+      "id": 6,
+      "name": "Eastgate Shopping Centre",
+      "address": "43 Bradford Rd, Bedfordview, Germiston",
+      "latitude": -26.1798,
+      "longitude": 28.1127,
+      "status": "fixed",
+      "statusColor": "#008000"
+    },
+    {
+      "id": 7,
+      "name": "University of Pretoria",
+      "address": "Hatfield, Pretoria",
+      "latitude": -25.7545,
+      "longitude": 28.2314,
+      "status": "in progress",
+      "statusColor": "#FFA500"
+    },
+    {
+      "id": 8,
+      "name": "Mall of Africa",
+      "address": "Magwa Crescent, Midrand",
+      "latitude": -25.9985,
+      "longitude": 28.1248,
+      "status": "fixed",
+      "statusColor": "#008000"
+    },
+    {
+      "id": 9,
+      "name": "Mamelodi",
+      "address": "Mamelodi East, Pretoria",
+      "latitude": -25.7303,
+      "longitude": 28.3789,
+      "status": "assigned",
+      "statusColor": "#4169E1"
+    },
+    {
+      "id": 10,
+      "name": "Johannesburg CBD",
+      "address": "Fox Street, Johannesburg Central",
+      "latitude": -26.2041,
+      "longitude": 28.0473,
+      "status": "in progress",
+      "statusColor": "#FFA500"
+    }
+  ] 
