@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import mockData from '../data/mockData.json';
 
 const ReportCard = ({ report, getCategoryName }) => {
@@ -60,6 +61,7 @@ const ReportCard = ({ report, getCategoryName }) => {
 
 
 const ReportsPage = () => {
+  const { currentUser } = useAuth();
   const [issues] = useState(mockData.issues);
   const [categories] = useState(mockData.categories);
 
@@ -81,7 +83,15 @@ const ReportsPage = () => {
   };
 
   const filteredReports = useMemo(() => {
-      return issues.filter(issue => {
+      let reports = issues;
+      
+      const isMunicipalityStaff = currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager';
+
+      if (isMunicipalityStaff) {
+        reports = issues.filter(issue => issue.municipality_id === currentUser.municipality_id);
+      }
+
+      return reports.filter(issue => {
           const statusMatch = selectedStatus === 'all' || issue.status.toLowerCase().replace(/\s+/g, '_') === selectedStatus;
           const categoryMatch = selectedCategory === 'all' || issue.category_id.toString() === selectedCategory;
           const searchMatch = searchTerm === '' || 
@@ -90,7 +100,7 @@ const ReportsPage = () => {
               issue.location.toLowerCase().includes(searchTerm.toLowerCase());
           return statusMatch && categoryMatch && searchMatch;
       });
-  }, [issues, selectedStatus, selectedCategory, searchTerm]);
+  }, [issues, selectedStatus, selectedCategory, searchTerm, currentUser]);
 
   return (
       <div className="p-8 bg-gray-50/50 min-h-screen">

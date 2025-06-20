@@ -25,7 +25,14 @@ export function AppSidebar() {
     return null;
   }
   
-  const isAdmin = currentUser.role === 'Admin' || currentUser.role === 'Super Admin' || currentUser.role === 'System Admin' || currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager' || currentUser.role === 'Contractor';
+  const isMunicipalityStaff = ['Municipality Admin', 'Manager'].includes(currentUser.role);
+  const isCorporateAdmin = ['Super Admin', 'System Admin'].includes(currentUser.role);
+  
+  const dashboardPath = isMunicipalityStaff
+    ? '/admin/dashboard' 
+    : isCorporateAdmin 
+    ? '/admin/corporate-dashboard' 
+    : '/';
 
   return (
     <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col shadow-sm">
@@ -47,9 +54,9 @@ export function AppSidebar() {
         <div className="space-y-1">
           <nav className="space-y-1">
             <button 
-              onClick={() => navigate('/')} 
+              onClick={() => navigate(dashboardPath)} 
               className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                isActive('/') 
+                isActive(dashboardPath)
                   ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
                   : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
@@ -82,58 +89,51 @@ export function AppSidebar() {
               <span>Map View</span>
             </button>
             
-            <button 
-              onClick={() => navigate('/report/new')} 
-              className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-            >
-              <PlusCircle className="h-5 w-5 mr-3" />
-              <span>New Report</span>
-            </button>
+            {!isCorporateAdmin && (
+              <button 
+                onClick={() => navigate('/report/new')} 
+                className="w-full flex items-center px-3 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                <PlusCircle className="h-5 w-5 mr-3" />
+                <span>New Report</span>
+              </button>
+            )}
           </nav>
         </div>
 
         {/* Admin Section */}
-        {isAdmin && (
+        {(isMunicipalityStaff || isCorporateAdmin) && (
           <div className="mt-8">
             <h3 className="px-3 text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">
               Administration
             </h3>
             <nav className="space-y-1">
-              <button 
-                onClick={() => navigate('/admin/dashboard')} 
-                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  isActive('/admin/dashboard') 
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <FileSpreadsheet className="h-5 w-5 mr-3" />
-                <span>Admin Dashboard</span>
-              </button>
-              
-              <button 
-                onClick={() => navigate('/admin/assignments')} 
-                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  isActive('/admin/assignments') 
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <Users2 className="h-5 w-5 mr-3" />
-                <span>Assignments</span>
-              </button>
-              
-              <button 
-                onClick={() => navigate('/admin/analytics')} 
-                className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
-                  isActive('/admin/analytics') 
-                    ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
-                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
-                }`}
-              >
-                <BarChart3 className="h-5 w-5 mr-3" />
-                <span>Analytics</span>
-              </button>
+              {isMunicipalityStaff && (
+                <button 
+                  onClick={() => navigate('/admin/manage-contractors')} 
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive('/admin/manage-contractors') 
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Users2 className="h-5 w-5 mr-3" />
+                  <span>Manage Contractors</span>
+                </button>
+              )}
+              {(currentUser.role === 'Municipality Admin' || isCorporateAdmin) && (
+                <button 
+                  onClick={() => navigate('/admin/users')} 
+                  className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive('/admin/users') 
+                      ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700' 
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
+                >
+                  <Users2 className="h-5 w-5 mr-3" />
+                  <span>Manage Users</span>
+                </button>
+              )}
             </nav>
           </div>
         )}

@@ -13,6 +13,10 @@ import ReportDetailPage from "./pages/ReportDetailPage";
 import NewReportPage from "./pages/NewReportPage";
 import LoginPage from "./pages/LoginPage";
 import RegistrationPage from "./pages/RegistrationPage";
+import ManageUsersPage from "./pages/admin/ManageUsersPage";
+import MunicipalityDashboardPage from './pages/admin/MunicipalityDashboardPage';
+import ManageContractorsPage from "./pages/admin/ManageContractorsPage";
+import CorporateDashboardPage from "./pages/admin/CorporateDashboardPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +40,10 @@ const App = () => (
               <Route path="reports" element={<ReportsPage />} />
               <Route path="report/new" element={<NewReportPage />} />
               <Route path="report/:id" element={<ReportDetailPage />} />
+              <Route path="admin/users" element={<ManageUsersPage />} />
+              <Route path="admin/dashboard" element={<MunicipalityDashboardPage />} />
+              <Route path="admin/corporate-dashboard" element={<CorporateDashboardPage />} />
+              <Route path="admin/manage-contractors" element={<ManageContractorsPage />} />
             </Route>
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegistrationPage />} />

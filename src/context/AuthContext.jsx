@@ -24,7 +24,7 @@ export const AuthProvider = ({ children }) => {
     const login = (email, password) => {
         const user = mockData.users.find(u => u.email === email);
         if (user) {
-            // In a real app, you'd verify the password hash. Here we accept any password.
+            //  Here we accept any password.
             const userWithRole = {
                 ...user,
                 // Assign role name based on role_id
