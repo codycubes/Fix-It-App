@@ -1,9 +1,9 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import { AppSidebar } from './AppSidebar';
-import { Navbar } from './Navbar';
+import { AppSidebar } from './AppSidebar.tsx';
+import { Navbar } from './Navbar.tsx';
 
-export function AppLayout() {
+export function AppLayout(): React.ReactElement {
   return (
     <div className="flex h-screen bg-gray-50/50">
       <div className="fixed inset-y-0 left-0 z-30">

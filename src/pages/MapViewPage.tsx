@@ -1,34 +1,37 @@
-import { useState, useEffect, useRef, useMemo } from 'react'
+import React, { useState, useEffect, useRef, useMemo } from 'react'
 import { Loader } from '@googlemaps/js-api-loader'
-import { useAuth } from '../context/AuthContext';
-import mockData from '../data/mockData.json'
+import useDataStore from '../store/useDataStore';
 import { Search, MapPin, Tag, ArrowRight } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
-function MapViewPage() {
-  const mapRef = useRef(null)
-  const reportListRef = useRef(null)
-  const reportItemRefs = useRef({})
+function MapViewPage(): React.ReactElement {
+  const mapRef = useRef<HTMLDivElement>(null)
+  const reportListRef = useRef<HTMLDivElement>(null)
+  const reportItemRefs = useRef<{ [key: number]: HTMLDivElement | null }>({})
   const navigate = useNavigate()
-  const [map, setMap] = useState(null)
-  const [markers, setMarkers] = useState([])
-  const [selectedIssue, setSelectedIssue] = useState(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedStatus, setSelectedStatus] = useState('all')
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [issues] = useState(mockData.issues)
-  const [users] = useState(mockData.users)
-  const [categories] = useState(mockData.categories)
-  const [municipalities] = useState(mockData.municipalities)
-  const { currentUser } = useAuth();
+  const { mockData, loading, fetchData, currentUser } = useDataStore();
+  const [map, setMap] = useState<google.maps.Map | null>(null)
+  const [markers, setMarkers] = useState<google.maps.Marker[]>([])
+  const [selectedIssue, setSelectedIssue] = useState<any | null>(null)
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const [selectedStatus, setSelectedStatus] = useState<string>('all')
+  const [selectedCategory, setSelectedCategory] = useState<string>('all')
+
+  useEffect(() => {
+    if (!mockData) {
+        fetchData();
+    }
+  }, [mockData, fetchData]);
 
   // Filter issues based on selected filters using useMemo
   const filteredIssues = useMemo(() => {
-    let reports = issues;
+    if (!mockData || !currentUser) return [];
+
+    let reports = mockData.issues;
     const isMunicipalityStaff = currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager';
 
     if (isMunicipalityStaff) {
-      reports = issues.filter(issue => issue.municipality_id === currentUser.municipality_id);
+      reports = reports.filter(issue => issue.municipality_id === currentUser.municipality_id);
     }
     return reports.filter(issue => {
       const statusMatch = selectedStatus === 'all' || 
@@ -40,7 +43,7 @@ function MapViewPage() {
         issue.location.toLowerCase().includes(searchQuery.toLowerCase())
       return statusMatch && categoryMatch && searchMatch
     })
-  }, [issues, selectedStatus, selectedCategory, searchQuery, currentUser])
+  }, [mockData, selectedStatus, selectedCategory, searchQuery, currentUser])
 
   // Initialize map
   useEffect(() => {
@@ -52,14 +55,16 @@ function MapViewPage() {
         })
 
         const { Map } = await loader.importLibrary('maps')
-        const mapInstance = new Map(mapRef.current, {
-          center: { lat: -26.1067, lng: 28.0568 },
-          zoom: 10,
-          mapId: 'DEMO_MAP_ID',
-          disableDefaultUI: true,
-          zoomControl: true,
-        })
-        setMap(mapInstance)
+        if (mapRef.current) {
+          const mapInstance = new Map(mapRef.current, {
+            center: { lat: -26.1067, lng: 28.0568 },
+            zoom: 10,
+            mapId: 'DEMO_MAP_ID',
+            disableDefaultUI: true,
+            zoomControl: true,
+          })
+          setMap(mapInstance)
+        }
       } catch (error) {
         console.error("Error initializing map:", error)
       }
@@ -100,13 +105,13 @@ function MapViewPage() {
         return marker
       })
 
-      setMarkers(newMarkers)
+      setMarkers(newMarkers as google.maps.Marker[])
     }
 
     updateMarkers().catch(console.error)
 
     if (selectedIssue && reportItemRefs.current[selectedIssue.issue_id]) {
-        reportItemRefs.current[selectedIssue.issue_id].scrollIntoView({
+        reportItemRefs.current[selectedIssue.issue_id]?.scrollIntoView({
             behavior: 'smooth',
             block: 'nearest',
         });
@@ -114,40 +119,48 @@ function MapViewPage() {
 
   }, [map, filteredIssues, selectedIssue])
 
-  const getStatusDisplay = (status) => {
+  const getStatusDisplay = (status: string): string => {
     return status.charAt(0).toUpperCase() + status.slice(1)
   }
 
-  const getCategoryName = (categoryId) => {
-    const category = categories.find(cat => cat.category_id === categoryId)
+  const getCategoryName = (categoryId: number): string => {
+    if (!mockData) return 'Unknown';
+    const category = mockData.categories.find(cat => cat.category_id === categoryId)
     return category ? category.name : 'Unknown'
   }
 
-  const getMunicipalityName = (municipalityId) => {
-    const municipality = municipalities.find(mun => mun.municipality_id === municipalityId)
+  const getMunicipalityName = (municipalityId: number): string => {
+    if (!mockData) return 'Unknown';
+    const municipality = mockData.municipalities.find(mun => mun.municipality_id === municipalityId)
     return municipality ? municipality.name : 'Unknown'
   }
 
-  const getAssignedUser = (userId) => {
-    const user = users.find(u => u.user_id === userId)
+  const getAssignedUser = (userId: number | null): string => {
+    if (!mockData || !userId) return 'Unassigned';
+    const user = mockData.users.find(u => u.user_id === userId)
     return user ? user.username : 'Unassigned'
   }
 
   // Get unique statuses from issues
-  const getUniqueStatuses = () => {
-    const statuses = [...new Set(issues.map(issue => issue.status))]
+  const getUniqueStatuses = (): { value: string; label: string }[] => {
+    if (!mockData) return [];
+    const statuses = [...new Set(mockData.issues.map(issue => issue.status))]
     return statuses.map(status => ({
       value: status.toLowerCase().replace(/\s+/g, '_'),
       label: getStatusDisplay(status)
     }))
   }
 
-  const handleReportClick = (issue) => {
+  const handleReportClick = (issue: any) => {
     setSelectedIssue(issue)
     if (map) {
       map.panTo({ lat: issue.latitude, lng: issue.longitude })
       map.setZoom(14)
     }
+  }
+
+  if (loading || !mockData) {
+    return <div>Loading...</div>
   }
 
   return (
@@ -188,7 +201,7 @@ function MapViewPage() {
           className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
         >
           <option value="all">All Categories</option>
-          {categories.map(category => (
+          {mockData.categories.map(category => (
             <option key={category.category_id} value={category.category_id}>
               {category.name}
             </option>

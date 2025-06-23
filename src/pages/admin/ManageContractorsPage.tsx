@@ -1,21 +1,26 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import initialMockData from '../../data/mockData.json';
+import useDataStore, { User } from '../../store/useDataStore';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import ContractorFormModal from '../../components/admin/ContractorFormModal';
 
-const ManageContractorsPage = () => {
-  const { currentUser } = useAuth();
-  const [mockData, setMockData] = useState(initialMockData);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingContractor, setEditingContractor] = useState(null);
+const ManageContractorsPage = (): React.ReactElement => {
+  const { currentUser, mockData, loading, fetchData, addContractor, updateContractor, deleteContractor } = useDataStore();
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingContractor, setEditingContractor] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (!mockData) {
+        fetchData();
+    }
+  }, [mockData, fetchData]);
 
   const contractors = useMemo(() => {
-    const isAllowed = currentUser?.role === 'Municipality Admin' || currentUser?.role === 'Manager';
-    if (!currentUser || !isAllowed) {
-      return [];
-    }
+    if (!currentUser || !mockData) return [];
+    
+    const isAllowed = currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager';
+    if (!isAllowed) return [];
+
     const contractorUserIds = mockData.contractors.map(c => c.user_id);
     return mockData.users.filter(user => 
       user.role_id === 5 && // Role ID for Contractor
@@ -29,47 +34,30 @@ const ManageContractorsPage = () => {
     setIsModalOpen(true);
   };
 
-  const handleEditContractor = (contractor) => {
+  const handleEditContractor = (contractor: User) => {
     setEditingContractor(contractor);
     setIsModalOpen(true);
   };
 
-  const handleDeleteContractor = (userId) => {
+  const handleDeleteContractor = (userId: number) => {
     if (window.confirm('Are you sure you want to delete this contractor?')) {
-      const newUsers = mockData.users.filter(u => u.user_id !== userId);
-      const newContractors = mockData.contractors.filter(c => c.user_id !== userId);
-      setMockData({ ...mockData, users: newUsers, contractors: newContractors });
+      deleteContractor(userId);
     }
   };
 
-  const handleSaveContractor = (contractorData) => {
+  const handleSaveContractor = (contractorData: any) => {
     if (editingContractor) {
-      const updatedUsers = mockData.users.map(u => 
-        u.user_id === contractorData.user_id ? { ...u, ...contractorData } : u
-      );
-      setMockData({ ...mockData, users: updatedUsers });
+      updateContractor(contractorData);
     } else {
-      const newUserId = Math.max(...mockData.users.map(u => u.user_id)) + 1;
-      const newUser = {
-        ...contractorData,
-        user_id: newUserId,
-        role_id: 5, // Contractor
-        municipality_id: currentUser.municipality_id,
-        created_at: new Date().toISOString(),
-      };
-      const newContractor = {
-        contractor_id: Math.max(...mockData.contractors.map(c => c.contractor_id)) + 1,
-        user_id: newUserId,
-      };
-      setMockData({ 
-        ...mockData, 
-        users: [...mockData.users, newUser],
-        contractors: [...mockData.contractors, newContractor]
-      });
+      addContractor(contractorData);
     }
   };
 
-  const canManageContractors = ['Municipality Admin', 'Manager'].includes(currentUser?.role);
+  const canManageContractors = useMemo(() => currentUser && ['Municipality Admin', 'Manager'].includes(currentUser.role || ''), [currentUser]);
+
+  if (loading || !currentUser) {
+    return <div>Loading...</div>;
+  }
 
   if (!canManageContractors) {
     return <Navigate to="/" replace />;

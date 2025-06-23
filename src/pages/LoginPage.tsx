@@ -1,22 +1,23 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import useDataStore from '../store/useDataStore';
 import { MapPinned } from 'lucide-react';
 
-const RegistrationPage = () => {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const { register } = useAuth();
+const LoginPage = (): React.ReactElement => {
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
+    const login = useDataStore((state) => state.login);
+    const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
-        try {
-            register({ username, email, password });
-        } catch (err) {
-            setError(err.message);
+        const success = login(email, password);
+        if (success) {
+            navigate('/');
+        } else {
+            setError('Invalid email or password. Please try again.');
         }
     };
 
@@ -27,35 +28,18 @@ const RegistrationPage = () => {
                     <div className="p-3 bg-blue-500 rounded-xl mb-4">
                         <MapPinned className="h-8 w-8 text-white" />
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">Create an Account</h1>
-                    <p className="text-gray-600 mt-1">Join Fix It Up to report and track issues in your community.</p>
+                    <h1 className="text-3xl font-bold text-gray-900">Sign in to Fix It Up</h1>
+                    <p className="text-gray-600 mt-1">Enter your details below to access your account.</p>
                 </div>
 
                 {error && (
-                     <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded-md" role="alert">
-                        <p className="font-bold">Registration Failed</p>
+                    <div className="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded-md" role="alert">
+                        <p className="font-bold">Error</p>
                         <p>{error}</p>
                     </div>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
-                            Username
-                        </label>
-                        <input
-                            id="username"
-                            name="username"
-                            type="text"
-                            autoComplete="username"
-                            required
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="John Doe"
-                        />
-                    </div>
-                    
                     <div>
                         <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                             Email Address
@@ -81,7 +65,7 @@ const RegistrationPage = () => {
                             id="password"
                             name="password"
                             type="password"
-                            autoComplete="new-password"
+                            autoComplete="current-password"
                             required
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -95,15 +79,15 @@ const RegistrationPage = () => {
                             type="submit"
                             className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                            Create Account
+                            Sign in
                         </button>
                     </div>
                 </form>
 
                 <p className="text-sm text-center text-gray-600">
-                    Already have an account?{' '}
-                    <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-                        Sign in
+                    Don't have an account?{' '}
+                    <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+                        Sign up
                     </Link>
                 </p>
             </div>
@@ -111,4 +95,4 @@ const RegistrationPage = () => {
     );
 };
 
-export default RegistrationPage; 
+export default LoginPage; 

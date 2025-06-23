@@ -1,7 +1,14 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
+import { User } from '../../store/useDataStore';
 
-const ContractorFormModal = ({ contractor, onClose, onSave }) => {
+interface ContractorFormModalProps {
+    contractor: User | null;
+    onClose: () => void;
+    onSave: (data: any) => void;
+}
+
+const ContractorFormModal: React.FC<ContractorFormModalProps> = ({ contractor, onClose, onSave }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -18,14 +25,14 @@ const ContractorFormModal = ({ contractor, onClose, onSave }) => {
     }
   }, [contractor]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...formData };
+    const payload: any = { ...formData };
     if (contractor) {
       payload.user_id = contractor.user_id;
     }

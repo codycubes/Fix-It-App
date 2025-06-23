@@ -1,7 +1,15 @@
+import React from 'react';
 import { ClipboardList, Hourglass, Hammer, CheckCircle, ShieldX } from 'lucide-react';
-import mockData from '../data/mockData.json';
+import useDataStore from '../store/useDataStore';
 
-const StatCard = ({ title, value, icon: Icon, color }) => (
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ElementType;
+  color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color }) => (
   <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80 flex items-center space-x-4">
     <div className={`p-3 rounded-full`} style={{ backgroundColor: `${color}1A`}}>
       <Icon className="h-6 w-6" style={{ color: color }} />
@@ -15,8 +23,13 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 
 
 const Index = () => {
-  const issues = mockData.issues;
+  const { mockData, loading } = useDataStore();
 
+  if (loading || !mockData) {
+    return <div>Loading...</div>;
+  }
+
+  const { issues } = mockData;
   const totalReports = issues.length;
   const pendingReports = issues.filter(issue => issue.status === 'Pending').length;
   const inProgressReports = issues.filter(issue => issue.status === 'In Progress').length;

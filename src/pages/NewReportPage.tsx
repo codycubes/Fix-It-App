@@ -1,71 +1,50 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Upload, Camera, Info, MapPin } from 'lucide-react';
+import useDataStore from '../store/useDataStore.ts';
 
-const NewReportPage = () => {
+const NewReportPage = (): React.ReactElement => {
     const navigate = useNavigate();
-    const [title, setTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [categoryId, setCategoryId] = useState('');
-    const [location, setLocation] = useState('');
-    const [files, setFiles] = useState([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [mockData, setMockData] = useState(null);
+    const { mockData, loading, fetchData, addIssue } = useDataStore();
+    const [title, setTitle] = useState<string>('');
+    const [description, setDescription] = useState<string>('');
+    const [categoryId, setCategoryId] = useState<string>('');
+    const [location, setLocation] = useState<string>('');
+    const [files, setFiles] = useState<File[]>([]);
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-    useState(() => {
-        import('../data/mockData.json')
-            .then(data => {
-                setMockData(data.default);
-            });
-    }, []);
+    useEffect(() => {
+        if (!mockData) {
+            fetchData();
+        }
+    }, [fetchData, mockData]);
 
-    const handleFileChange = (e) => {
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             setFiles(Array.from(e.target.files).slice(0, 5)); // Limit to 5 files
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!mockData) return;
         
         setIsSubmitting(true);
         
-        const newIssue = {
-            issue_id: Math.max(...mockData.issues.map(i => i.issue_id)) + 1,
-            user_id: mockData.currentUser.user_id,
-            category_id: parseInt(categoryId),
-            municipality_id: mockData.currentUser.municipality_id,
+        addIssue({
             title,
             description,
             location,
             latitude: -26.10, // Dummy data
             longitude: 28.05,  // Dummy data
-            status: "Pending",
-            status_color: "#FFD700",
-            priority: "Medium",
-            assigned_to: null,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-            image_url: `https://picsum.photos/seed/report${Math.max(...mockData.issues.map(i => i.issue_id)) + 1}/800/600`
-        };
-
-        const updatedData = {
-            ...mockData,
-            issues: [...mockData.issues, newIssue]
-        };
-
-        // This is a conceptual step. In a real environment, an API call would be made.
-        // For this project, we are logging it and navigating away.
-        // To persist, manual update to mockData.json would be needed with the logged object.
-        console.log("Updated mockData object:", updatedData);
+            category_id: parseInt(categoryId),
+        });
 
         setIsSubmitting(false);
-        alert('New issue has been created and logged to the console. Please manually update mockData.json to persist this change.');
         navigate('/reports');
     };
     
-    if (!mockData) {
+    if (loading || !mockData) {
         return <div>Loading...</div>;
     }
 
@@ -128,7 +107,7 @@ const NewReportPage = () => {
                         <label htmlFor="description" className="block text-sm font-bold text-gray-800 mb-1">Description</label>
                         <textarea
                             id="description"
-                            rows="4"
+                            rows={4}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -180,7 +159,7 @@ const NewReportPage = () => {
                     <button type="button" onClick={() => navigate('/reports')} className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-800 font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200">
                         Cancel
                     </button>
-                    <button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed">
+                    <button type="submit" disabled={isSubmitting || loading} className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200 disabled:bg-blue-400 disabled:cursor-not-allowed">
                         {isSubmitting ? 'Submitting...' : 'Submit Report'}
                     </button>
                 </div>

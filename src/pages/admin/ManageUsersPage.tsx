@@ -1,76 +1,73 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import initialMockData from '../../data/mockData.json';
+import useDataStore, { User } from '../../store/useDataStore';
 import { PlusCircle, Edit, Trash2 } from 'lucide-react';
 import UserFormModal from '../../components/admin/UserFormModal';
 
-const ManageUsersPage = () => {
-  const { currentUser } = useAuth();
-  const [users, setUsers] = useState(initialMockData.users);
-  const [roles] = useState(initialMockData.roles);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState(null);
+const ManageUsersPage = (): React.ReactElement => {
+  const { currentUser, mockData, loading, fetchData, addUser, updateUser, deleteUser } = useDataStore();
+  
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
-  const getRoleName = (roleId) => roles.find(r => r.role_id === roleId)?.role_name || 'Unknown';
+  useEffect(() => {
+    if (!mockData) {
+      fetchData();
+    }
+  }, [mockData, fetchData]);
 
-  const usersToDisplay = useMemo(() => {
-    const allUsers = users;
-    const allRoles = roles;
+  const getRoleName = (roleId: number): string => mockData?.roles.find(r => r.role_id === roleId)?.role_name || 'Unknown';
+
+  const usersToDisplay = useMemo((): User[] => {
+    if (!mockData || !currentUser) return [];
+
+    const { users, roles } = mockData;
     
-    const roleNameToId = (roleName) => allRoles.find(r => r.role_name === roleName)?.role_id;
+    const roleNameToId = (roleName: string): number | undefined => roles.find(r => r.role_name === roleName)?.role_id;
 
     switch (currentUser.role) {
       case 'Super Admin':
       case 'System Admin':
-        return allUsers;
+        return users;
       case 'Municipality Admin':
-        return allUsers.filter(u => 
+        return users.filter(u => 
           u.municipality_id === currentUser.municipality_id &&
           (u.role_id === roleNameToId('Manager') || u.role_id === roleNameToId('Contractor'))
         );
       default:
         return [];
     }
-  }, [currentUser, users, roles]);
+  }, [currentUser, mockData]);
 
   const handleAddUser = () => {
     setEditingUser(null);
     setIsModalOpen(true);
   };
 
-  const handleEditUser = (user) => {
+  const handleEditUser = (user: User) => {
     setEditingUser(user);
     setIsModalOpen(true);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = (userId: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
-      // Note: This only updates the state in the browser.
-      setUsers(users.filter(u => u.user_id !== userId));
-      console.log(`User with ID ${userId} deleted from state.`);
+      deleteUser(userId);
     }
   };
 
-  const handleSaveUser = (userData) => {
-    // Note: This logic is for client-side state management only.
+  const handleSaveUser = (userData: any) => {
     if (editingUser) {
-      // Edit existing user
-      setUsers(users.map(u => (u.user_id === userData.user_id ? userData : u)));
-      console.log('User updated in state:', userData);
+      updateUser(userData);
     } else {
-      // Add new user
-      const newUser = {
-        ...userData,
-        user_id: Math.max(...users.map(u => u.user_id)) + 1,
-        created_at: new Date().toISOString(),
-      };
-      setUsers([...users, newUser]);
-      console.log('New user added to state:', newUser);
+      addUser(userData);
     }
   };
   
-  const canManageUsers = ['Super Admin', 'System Admin', 'Municipality Admin'].includes(currentUser.role);
+  const canManageUsers = ['Super Admin', 'System Admin', 'Municipality Admin'].includes(currentUser?.role || '');
+
+  if (loading || !currentUser) {
+    return <div>Loading...</div>;
+  }
 
   if (!canManageUsers) {
     return <Navigate to="/" replace />;
@@ -125,6 +122,8 @@ const ManageUsersPage = () => {
           user={editingUser}
           onClose={() => setIsModalOpen(false)}
           onSave={handleSaveUser}
+          roles={mockData.roles}
+          municipalities={mockData.municipalities}
         />
       )}
     </div>

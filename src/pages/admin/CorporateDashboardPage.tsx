@@ -1,11 +1,17 @@
-import { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import initialMockData from '../../data/mockData.json';
+import useDataStore from '../../store/useDataStore';
 import { ClipboardList, CheckCircle, Hourglass, BarChart2, Briefcase, Building } from 'lucide-react';
 import { formatDistanceStrict } from 'date-fns';
 
-const StatCard = ({ title, value, icon: Icon, color }) => (
+interface StatCardProps {
+    title: string;
+    value: number | string;
+    icon: React.ElementType;
+    color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80">
         <div className="flex justify-between items-start">
             <p className="text-sm font-medium text-gray-600">{title}</p>
@@ -15,16 +21,19 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
     </div>
 );
 
-const CorporateDashboardPage = () => {
-    const { currentUser } = useAuth();
+const CorporateDashboardPage = (): React.ReactElement => {
+    const { currentUser, mockData, loading, fetchData } = useDataStore();
 
-    if (!['Super Admin', 'System Admin'].includes(currentUser.role)) {
-        return <Navigate to="/" replace />;
-    }
-    
-    const { issues, municipalities } = initialMockData;
+    useEffect(() => {
+        if (!mockData) {
+          fetchData();
+        }
+    }, [mockData, fetchData]);
 
     const dashboardStats = useMemo(() => {
+        if (!mockData) return null;
+
+        const { issues, municipalities } = mockData;
         const totalIssues = issues.length;
         const resolvedIssues = issues.filter(i => i.status === 'Resolved' || i.status === 'Closed').length;
         const pendingIssues = issues.filter(i => i.status === 'Pending' || i.status === 'In Progress' || i.status === 'Assigned').length;
@@ -62,8 +71,16 @@ const CorporateDashboardPage = () => {
             pendingIssues,
             issuesByMunicipality,
         };
-    }, [issues, municipalities]);
+    }, [mockData]);
 
+    if (loading || !currentUser || !dashboardStats) {
+        return <div>Loading...</div>;
+    }
+
+    if (!currentUser.role || !['Super Admin', 'System Admin'].includes(currentUser.role)) {
+        return <Navigate to="/" replace />;
+    }
+    
     return (
         <div className="p-8 bg-gray-50/50 min-h-screen">
             <header className="mb-8">

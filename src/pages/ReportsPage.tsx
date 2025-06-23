@@ -1,14 +1,18 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import mockData from '../data/mockData.json';
+import useDataStore from '../store/useDataStore';
 
-const ReportCard = ({ report, getCategoryName }) => {
+interface ReportCardProps {
+    report: any;
+    getCategoryName: (categoryId: number) => string;
+}
+
+const ReportCard: React.FC<ReportCardProps> = ({ report, getCategoryName }) => {
   const { issue_id, title, description, location, status, status_color, created_at, category_id, image_url } = report;
   const navigate = useNavigate();
 
-  const getStatusDisplay = (status) => {
+  const getStatusDisplay = (status: string): string => {
     if (!status) return '';
     // This will handle "in_progress" to "In Progress"
     return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -60,21 +64,26 @@ const ReportCard = ({ report, getCategoryName }) => {
 };
 
 
-const ReportsPage = () => {
-  const { currentUser } = useAuth();
-  const [issues] = useState(mockData.issues);
-  const [categories] = useState(mockData.categories);
+const ReportsPage = (): React.ReactElement => {
+  const { mockData, loading, fetchData, currentUser } = useDataStore();
+  
+  useEffect(() => {
+    if (!mockData) {
+      fetchData();
+    }
+  }, [mockData, fetchData]);
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('all');
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const getCategoryName = (categoryId) => {
-      const category = categories.find(cat => cat.category_id === categoryId);
+  const getCategoryName = (categoryId: number): string => {
+      if (!mockData) return 'Unknown';
+      const category = mockData.categories.find(cat => cat.category_id === categoryId);
       return category ? category.name : 'Unknown';
   };
   
-  const getUniqueStatuses = () => {
+  const getUniqueStatuses = (): { value: string; label: string }[] => {
     const statuses = ['Pending', 'Assigned', 'In Progress', 'Resolved', 'Closed'];
     return statuses.map(status => ({
         value: status.toLowerCase().replace(/\s+/g, '_'),
@@ -83,12 +92,14 @@ const ReportsPage = () => {
   };
 
   const filteredReports = useMemo(() => {
-      let reports = issues;
+      if (!mockData || !currentUser) return [];
+
+      let reports = mockData.issues;
       
       const isMunicipalityStaff = currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager';
 
       if (isMunicipalityStaff) {
-        reports = issues.filter(issue => issue.municipality_id === currentUser.municipality_id);
+        reports = reports.filter(issue => issue.municipality_id === currentUser.municipality_id);
       }
 
       return reports.filter(issue => {
@@ -100,7 +111,11 @@ const ReportsPage = () => {
               issue.location.toLowerCase().includes(searchTerm.toLowerCase());
           return statusMatch && categoryMatch && searchMatch;
       });
-  }, [issues, selectedStatus, selectedCategory, searchTerm, currentUser]);
+  }, [mockData, selectedStatus, selectedCategory, searchTerm, currentUser]);
+
+  if (loading || !mockData) {
+    return <div>Loading...</div>;
+  }
 
   return (
       <div className="p-8 bg-gray-50/50 min-h-screen">
@@ -142,7 +157,7 @@ const ReportsPage = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white text-sm"
                       >
                           <option value="all">All Categories</option>
-                          {categories.map(category => (
+                          {mockData.categories.map(category => (
                               <option key={category.category_id} value={category.category_id.toString()}>
                                   {category.name}
                               </option>

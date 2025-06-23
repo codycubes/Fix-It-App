@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import useDataStore from '../../store/useDataStore';
 import {
   BarChart3,
   ClipboardList,
@@ -13,20 +13,20 @@ import {
   Users2,
 } from 'lucide-react';
 
-export function AppSidebar() {
+export function AppSidebar(): React.ReactElement | null {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser } = useAuth();
+  const { currentUser } = useDataStore();
   
-  const isActive = (path) => location.pathname === path;
+  const isActive = (path: string): boolean => location.pathname === path;
   
   if (!currentUser) {
     // Or a loading spinner, or some placeholder
     return null;
   }
   
-  const isMunicipalityStaff = ['Municipality Admin', 'Manager'].includes(currentUser.role);
-  const isCorporateAdmin = ['Super Admin', 'System Admin'].includes(currentUser.role);
+  const isMunicipalityStaff = ['Municipality Admin', 'Manager'].includes(currentUser.role!);
+  const isCorporateAdmin = ['Super Admin', 'System Admin'].includes(currentUser.role!);
   
   const dashboardPath = isMunicipalityStaff
     ? '/admin/dashboard' 

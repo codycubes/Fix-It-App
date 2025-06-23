@@ -1,10 +1,16 @@
-import { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import initialMockData from '../../data/mockData.json';
+import useDataStore from '../../store/useDataStore';
 import { ClipboardList, CheckCircle, Hourglass, UserCheck, BarChart2, Briefcase } from 'lucide-react';
 
-const StatCard = ({ title, value, icon: Icon, color }) => (
+interface StatCardProps {
+    title: string;
+    value: number | string;
+    icon: React.ElementType;
+    color: string;
+}
+
+const StatCard: React.FC<StatCardProps> = ({ title, value, icon: Icon, color }) => (
     <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200/80">
         <div className="flex justify-between items-start">
             <p className="text-sm font-medium text-gray-600">{title}</p>
@@ -14,27 +20,27 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
     </div>
 );
 
-const MunicipalityDashboardPage = () => {
-    const { currentUser } = useAuth();
+const MunicipalityDashboardPage = (): React.ReactElement => {
+    const { currentUser, mockData, loading, fetchData } = useDataStore();
 
-    const canViewPage = ['Municipality Admin', 'Manager'].includes(currentUser.role);
+    useEffect(() => {
+        if (!mockData) {
+            fetchData();
+        }
+    }, [mockData, fetchData]);
 
-    if (!canViewPage) {
-        return <Navigate to="/" replace />;
-    }
-    
-    const { issues, categories, users, municipalities } = initialMockData;
+    const canViewPage = useMemo(() => currentUser && ['Municipality Admin', 'Manager'].includes(currentUser.role || ''), [currentUser]);
 
-    const getMunicipalityName = (municipalityId) => {
-        return municipalities.find(m => m.municipality_id === municipalityId)?.name || 'Unknown Municipality';
-    }
-
-    const issuesInMunicipality = useMemo(() => 
-        issues.filter(issue => issue.municipality_id === currentUser.municipality_id),
-        [issues, currentUser.municipality_id]
-    );
+    const issuesInMunicipality = useMemo(() => {
+        if (!mockData || !currentUser || !currentUser.municipality_id) return [];
+        return mockData.issues.filter(issue => issue.municipality_id === currentUser.municipality_id)
+    }, [mockData, currentUser]);
 
     const dashboardStats = useMemo(() => {
+        if (!mockData || !currentUser || !currentUser.municipality_id) return null;
+
+        const { categories, users } = mockData;
+        
         const resolved = issuesInMunicipality.filter(i => i.status === 'Resolved');
         const totalResolutionTime = resolved.reduce((acc, i) => {
             const created = new Date(i.created_at).getTime();
@@ -65,12 +71,24 @@ const MunicipalityDashboardPage = () => {
             issuesByCategory,
             issuesByContractor,
         };
-    }, [issuesInMunicipality, categories, users, currentUser.municipality_id]);
+    }, [issuesInMunicipality, mockData, currentUser]);
+
+    if (loading || !currentUser || !dashboardStats) {
+        return <div>Loading...</div>;
+    }
+
+    if (!canViewPage) {
+        return <Navigate to="/" replace />;
+    }
+    
+    const getMunicipalityName = (municipalityId: number): string => {
+        return mockData?.municipalities.find(m => m.municipality_id === municipalityId)?.name || 'Unknown Municipality';
+    }
 
     return (
         <div className="p-8 bg-gray-50/50 min-h-screen">
             <header className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900">{getMunicipalityName(currentUser.municipality_id)}</h1>
+                <h1 className="text-3xl font-bold text-gray-900">{getMunicipalityName(currentUser.municipality_id || 0)}</h1>
                 <p className="text-gray-600 mt-1">Analytics for issues within your municipality.</p>
             </header>
 

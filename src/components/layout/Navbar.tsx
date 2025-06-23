@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronDown, User, LogOut } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import useDataStore from '../../store/useDataStore';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,8 +10,8 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 
-export const Navbar = () => {
-  const { currentUser, logout } = useAuth();
+export const Navbar = (): React.ReactElement => {
+  const { currentUser, logout } = useDataStore();
 
   if (!currentUser) {
     return (

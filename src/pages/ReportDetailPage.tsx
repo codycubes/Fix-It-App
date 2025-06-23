@@ -1,8 +1,7 @@
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
 import { ArrowLeft, MapPin, Calendar, User, Clock, Tag, Shield, Edit, CheckCircle2 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import initialMockData from '../data/mockData.json';
+import useDataStore from '../store/useDataStore';
 import { formatDistanceToNow, formatDistanceStrict } from 'date-fns';
 
 const statusOptions = [
@@ -13,80 +12,82 @@ const statusOptions = [
     { value: 'Closed', color: '#808080' },
 ];
 
-const priorityOptions = ['Low', 'Medium', 'High', 'Critical'];
+const priorityOptions: string[] = ['Low', 'Medium', 'High', 'Critical'];
 
-const ReportDetailPage = () => {
-  const { id } = useParams();
+const ReportDetailPage = (): React.ReactElement => {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { currentUser } = useAuth();
+  const { mockData, loading, fetchData, currentUser, updateIssue } = useDataStore();
   
-  const [issue, setIssue] = useState(null);
-  const [activeTab, setActiveTab] = useState('details');
+  const [activeTab, setActiveTab] = useState<string>('details');
+
+  const issue = useMemo(() => {
+    if (!mockData) return null;
+    const foundIssue = mockData.issues.find(i => i.issue_id.toString() === id);
+    if (foundIssue && !foundIssue.status_history) {
+        foundIssue.status_history = [{ status: foundIssue.status, timestamp: foundIssue.created_at }];
+    }
+    return foundIssue;
+  }, [mockData, id]);
 
   useEffect(() => {
-    const foundIssue = initialMockData.issues.find(i => i.issue_id.toString() === id);
-    if (foundIssue) {
-        // Ensure status_history exists, if not create a default one
-        if (!foundIssue.status_history) {
-            foundIssue.status_history = [{ status: foundIssue.status, timestamp: foundIssue.created_at }];
-        }
-        setIssue(foundIssue);
+    if (!mockData) {
+      fetchData();
     }
-  }, [id]);
+  }, [mockData, fetchData]);
 
-  const getCategoryName = (categoryId) => {
-    const category = initialMockData.categories.find(cat => cat.category_id === categoryId);
+  const getCategoryName = (categoryId: number): string => {
+    if (!mockData) return 'Unknown';
+    const category = mockData.categories.find(cat => cat.category_id === categoryId);
     return category ? category.name : 'Unknown';
   };
 
-  const getMunicipalityName = (municipalityId) => {
-    const municipality = initialMockData.municipalities.find(mun => mun.municipality_id === municipalityId);
+  const getMunicipalityName = (municipalityId: number): string => {
+    if (!mockData) return 'Unknown';
+    const municipality = mockData.municipalities.find(mun => mun.municipality_id === municipalityId);
     return municipality ? municipality.name : 'Unknown';
   };
 
-  const getReporter = (userId) => {
-    return initialMockData.users.find(u => u.user_id === userId);
+  const getReporter = (userId: number) => {
+    if (!mockData) return null;
+    return mockData.users.find(u => u.user_id === userId);
   };
 
-  const getAssignedContractor = (userId) => {
-    if (!userId) return null;
-    return initialMockData.users.find(u => u.user_id === userId);
+  const getAssignedContractor = (userId: number | null) => {
+    if (!userId || !mockData) return null;
+    return mockData.users.find(u => u.user_id === userId);
   };
   
-  const handleAssignContractor = (contractorId) => {
-    const updatedIssue = {
-        ...issue,
+  const handleAssignContractor = (contractorId: number) => {
+    if (!issue) return;
+    updateIssue(issue.issue_id, {
         assigned_to: contractorId,
         status: 'Assigned',
-        status_color: statusOptions.find(s => s.value === 'Assigned').color,
-        updated_at: new Date().toISOString(),
-    };
-    setIssue(updatedIssue);
-    console.log("Issue assigned and status updated (in state):", updatedIssue);
+        status_color: statusOptions.find(s => s.value === 'Assigned')?.color || '#4169E1',
+    });
     alert('Contractor assigned successfully. Issue status is now "Assigned".');
   };
 
-  const handleStatusChange = (newStatus) => {
-    const updatedIssue = {
-        ...issue,
+  const handleStatusChange = (newStatus: string) => {
+    if (!issue) return;
+    updateIssue(issue.issue_id, {
         status: newStatus,
-        status_color: statusOptions.find(s => s.value === newStatus).color,
-        updated_at: new Date().toISOString(),
+        status_color: statusOptions.find(s => s.value === newStatus)?.color || '#808080',
         status_history: [...(issue.status_history || []), { status: newStatus, timestamp: new Date().toISOString() }]
-    };
-    setIssue(updatedIssue);
-    console.log("Issue status updated (in state):", updatedIssue);
+    });
   };
   
-  const handlePriorityChange = (newPriority) => {
-      setIssue({...issue, priority: newPriority});
-      console.log("Issue priority updated (in state) to:", newPriority);
+  const handlePriorityChange = (newPriority: string) => {
+      if (!issue) return;
+      updateIssue(issue.issue_id, {priority: newPriority});
+      console.log("Issue priority updated to:", newPriority);
   };
 
-  const contractors = initialMockData.users.filter(user => user.role_id === 5 && user.municipality_id === issue?.municipality_id);
+  const contractors = mockData ? mockData.users.filter(user => user.role_id === 5 && user.municipality_id === issue?.municipality_id) : [];
 
-  if (!issue) {
-    return (
+  if (loading || !issue || !currentUser) {
+    if (loading) return <div>Loading report...</div>;
+    if (!issue) return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-gray-50">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Report not found</h2>
         <p className="text-gray-600 mb-6">The report you are looking for does not exist or you do not have permission to view it.</p>
@@ -99,9 +100,10 @@ const ReportDetailPage = () => {
         </button>
       </div>
     );
+    return <div>Loading...</div>;
   }
 
-  const reporter = getReporter(issue.reported_by);
+  const reporter = getReporter(issue.user_id);
   const assignedContractor = getAssignedContractor(issue.assigned_to);
   
   const canManageIssue = (currentUser.role === 'Municipality Admin' || currentUser.role === 'Manager') 
@@ -139,7 +141,7 @@ const ReportDetailPage = () => {
                 {issue.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </span>
               <span>{getCategoryName(issue.category_id)}</span>
-              <span>Reported on {new Date(issue.created_at).toLocaleDateString()}</span>
+              <span>Reported on {new Date(issue.created_at).toLocaleString('en-US', { dateStyle: 'long', timeStyle: 'short' })}</span>
             </div>
           </div>
         </div>

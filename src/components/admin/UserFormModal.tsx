@@ -1,10 +1,17 @@
-import { useState, useMemo, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import initialMockData from '../../data/mockData.json';
+import React, { useState, useMemo, useEffect } from 'react';
+import useDataStore, { User, Role, Municipality } from '../../store/useDataStore';
 import { X } from 'lucide-react';
 
-const UserFormModal = ({ user, onClose, onSave }) => {
-  const { currentUser } = useAuth();
+interface UserFormModalProps {
+    user: User | null;
+    onClose: () => void;
+    onSave: (data: any) => void;
+    roles: Role[];
+    municipalities: Municipality[];
+}
+
+const UserFormModal: React.FC<UserFormModalProps> = ({ user, onClose, onSave, roles, municipalities }) => {
+  const { currentUser } = useDataStore();
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -18,21 +25,21 @@ const UserFormModal = ({ user, onClose, onSave }) => {
       setFormData({
         username: user.username,
         email: user.email,
-        role_id: user.role_id,
-        municipality_id: user.municipality_id || '',
+        role_id: user.role_id.toString(),
+        municipality_id: user.municipality_id?.toString() || '',
         password: '' // Password should not be pre-filled
       });
     }
   }, [user]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload = { ...formData };
+    const payload: any = { ...formData };
     if (user) {
       payload.user_id = user.user_id;
     }
@@ -40,25 +47,28 @@ const UserFormModal = ({ user, onClose, onSave }) => {
         alert('Password is required for new users.');
         return;
     }
+    // Make sure role_id and municipality_id are numbers
+    payload.role_id = parseInt(payload.role_id, 10);
+    if (payload.municipality_id) {
+        payload.municipality_id = parseInt(payload.municipality_id, 10);
+    }
     onSave(payload);
     onClose();
   };
 
   const availableRoles = useMemo(() => {
-    const allRoles = initialMockData.roles;
+    if (!roles || !currentUser?.role) return [];
     switch (currentUser.role) {
       case 'Super Admin':
       case 'System Admin':
-        return allRoles;
+        return roles;
       case 'Municipality Admin':
-        return allRoles.filter(r => r.role_name === 'Manager' || r.role_name === 'Contractor');
+        return roles.filter(r => r.role_name === 'Manager' || r.role_name === 'Contractor');
       default:
         return [];
     }
-  }, [currentUser.role]);
+  }, [currentUser?.role, roles]);
   
-  const municipalities = initialMockData.municipalities;
-
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-center">
       <div className="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg relative">
@@ -88,13 +98,13 @@ const UserFormModal = ({ user, onClose, onSave }) => {
               ))}
             </select>
           </div>
-          {formData.role_id && availableRoles.find(r => r.role_id == formData.role_id)?.role_name !== 'Super Admin' && (
+          {formData.role_id && availableRoles.find(r => r.role_id == parseInt(formData.role_id))?.role_name !== 'Super Admin' && (
             <div>
               <label className="block text-sm font-medium text-gray-700">Municipality</label>
               <select name="municipality_id" value={formData.municipality_id} onChange={handleChange} required className="mt-1 w-full px-3 py-2 border border-gray-300 rounded-lg bg-white">
                 <option value="" disabled>Select a municipality</option>
                 {municipalities.map(m => (
-                    <option key={m.municipality__id} value={m.municipality_id}>{m.name}</option>
+                    <option key={m.municipality_id} value={m.municipality_id}>{m.name}</option>
                 ))}
               </select>
             </div>
